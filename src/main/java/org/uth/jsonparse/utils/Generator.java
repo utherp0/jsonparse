@@ -133,10 +133,74 @@ public class Generator
     // Sort the namespaces 
     Collections.sort(namespaces, String.CASE_INSENSITIVE_ORDER);
 
+    StringBuilder namespaceOutput = new StringBuilder();
     for( String name : namespaces )
     {
       System.out.printf( name + " : %f", namespaceCounts.get(name) );
       System.out.println( "" ) ;
+
+      namespaceOutput.append( name + "," + namespaceCounts.get(name) +"\n" );
     }
+
+    //System.out.println( namespaceOutput.toString());
+
+    // Now namespace/pod cpu counts
+    Map<String,Double> podCPUCounts = new HashMap<>();
+
+    for( Metrics data : metrics )
+    {
+      // Aggregate the CPU counts for this metric
+      double count = 0;
+      Map<Long,Double> values = data.getMetrics();
+
+      for( Long datestamp : values.keySet())
+      {
+        // Only process if startPoint is zero *or* the timestamp falls between the targets
+        if( startPoint == 0 || 
+            ( datestamp.doubleValue() >= startPoint && datestamp.doubleValue() <= endPoint ))
+        {
+          Double value = values.get(datestamp);
+          count += value.doubleValue();
+        }
+      }
+
+      String podName = data.getNamespace() + "/" + data.getPod();
+
+      if( !( podCPUCounts.containsKey(podName)))
+      {
+        podCPUCounts.put(podName, new Double(count));
+      }
+      else
+      {
+        Double current = podCPUCounts.get(podName);
+        Double newValue = new Double( current.doubleValue() + count );
+
+        podCPUCounts.remove(podName);
+        podCPUCounts.put(podName, newValue );
+      }
+    }
+
+    // Sort the podNames
+    List<String> podNames = new ArrayList<>();
+
+    for( Metrics data : metrics )
+    {
+      String aggregateName = data.getNamespace() + "/" + data.getPod();
+
+      if( !( podNames.contains(aggregateName))) podNames.add( aggregateName);
+    }
+
+    Collections.sort(podNames, String.CASE_INSENSITIVE_ORDER);
+
+    StringBuilder podOutput = new StringBuilder();
+    for( String name : podNames )
+    {
+      System.out.printf( name + " : %f", podCPUCounts.get(name) );
+      System.out.println( "" ) ;
+
+      podOutput.append( name + "," + podCPUCounts.get(name) +"\n" );
+    }
+
+    //System.out.println( podOutput.toString());
   }
 }
