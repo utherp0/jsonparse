@@ -33,6 +33,8 @@ public class Metrics
 
   public void addJSONMetric( String basejson )
   {
+    //if( _pod.equals("cpmx-189-ws8l2")) { System.out.println( "cpmx-189-ws8l2 " + basejson ); }
+
     String working = basejson.substring(1,basejson.length()-2);
     String[] components = working.split( "," );
 

@@ -153,6 +153,8 @@ public class Generator
       double count = 0;
       Map<Long,Double> values = data.getMetrics();
 
+      System.out.println( "Metric count for pod " + data.getPod() + " = " + values.size());
+
       for( Long datestamp : values.keySet())
       {
         // Only process if startPoint is zero *or* the timestamp falls between the targets
@@ -160,6 +162,8 @@ public class Generator
             ( datestamp.doubleValue() >= startPoint && datestamp.doubleValue() <= endPoint ))
         {
           Double value = values.get(datestamp);
+          //if( data.getPod().equals( "cpmx-189-ws8l2") && data.getNamespace().equals( "dk0257-c") ) System.out.println( "INC COUNT cpmx-189-ws8l2  with " + value );
+
           count += value.doubleValue();
         }
       }
@@ -168,13 +172,20 @@ public class Generator
 
       if( !( podCPUCounts.containsKey(podName)))
       {
+        //if( data.getPod().equals( "cpmx-189-ws8l2") && data.getNamespace().equals( "dk0257-c")  ) System.out.println( "CREATING cpmx-189-ws8l2  with " + count );
         podCPUCounts.put(podName, new Double(count));
       }
       else
       {
         Double current = podCPUCounts.get(podName);
+        //if( data.getPod().equals( "cpmx-189-ws8l2")  && data.getNamespace().equals( "dk0257-c")  ) System.out.println( "CURRENTLY cpmx-189-ws8l2  with " + current );
+        //if( data.getPod().equals( "cpmx-189-ws8l2")  && data.getNamespace().equals( "dk0257-c")  ) System.out.println( "ADDING cpmx-189-ws8l2  with " + count );
+
+
         Double newValue = new Double( current.doubleValue() + count );
 
+        //if( data.getPod().equals( "cpmx-189-ws8l2")  && data.getNamespace().equals( "dk0257-c")  ) System.out.println( "REPLACING cpmx-189-ws8l2  with " + newValue );
+      
         podCPUCounts.remove(podName);
         podCPUCounts.put(podName, newValue );
       }

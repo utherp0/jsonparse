@@ -1,6 +1,7 @@
 package org.uth.jsonparse.utils;
 
 import java.util.*;
+import java.io.*;
 import org.uth.jsonparse.currency.*;
 import com.jayway.jsonpath.*;
 import net.minidev.json.JSONArray;
@@ -58,6 +59,7 @@ public class Analyze
     for( int loop = 0; loop < names.size(); loop++ )
     {
       HashMap<String,Object> records = JsonPath.read( _parsedFile, "$.data.result[" + loop + "]");
+      JSONArray values = JsonPath.read( _parsedFile, "$.data.result[" + loop + "].values");
 
       // Extract the metadata and create a Metrics object with it
       Map<String,String> metadata = (HashMap<String,String>)records.get("metric");
@@ -71,7 +73,8 @@ public class Analyze
       Metrics metrics = new Metrics(namespace, pod, region, zone, cluster);
 
       // Extract the actual metrics (epoch/cpu) and add them to the Metrics object
-      JSONArray metricsValues = (JSONArray)records.get("values");
+      //JSONArray metricsValues = (JSONArray)records.get("values");
+      JSONArray metricsValues = values;
 
       for( int metricsLoop = 0; metricsLoop < metricsValues.size(); metricsLoop++ )
       {
