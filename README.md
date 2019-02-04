@@ -6,9 +6,14 @@ Clone the repo, then:
 
 mvn clean install
 
-To run the utility use:
+To run the utility pre-parse the original file using:
 
-java -classpath target/jsonparse-1.0-jar-with-dependencies.jar org.uth.jsonparse.utils.Generator data/container_cpu_usage_seconds_total.json "2018-12-26 00:00:00" "2019-01-10 23:59:59"
+java -classpath target/jsonparse-1.0-jar-with-dependencies.jar org.uth.jsonparse.utils.Preparse data/container_cpu_usage_seconds_total.json data/output true
 
-(replace the data/xxxx.json with the target JSON file, and the start and finish times with yyyy-mm-dd hh:mm:ss format)
-Time brackets are optional, if you provide no times the genertaor defaults to providing the CPU counts for all records.
+(where data/output is the target directory for the smaller files, parsed for performance)
+
+Then use:
+
+java -classpath target/jsonparse-1.0-jar-with-dependencies.jar org.uth.jsonparse.utils.GenerateReportFromFiles data/output/ output.txt "2018-01-04 05:28:55" "2019-01-30 04:24:55"
+
+(where data/output is the target directory where the interim files were generated, output.txt is a future enhancement for generating a report and the start and end dates in normal format for refining output)
