@@ -135,7 +135,12 @@ public class GenerateReportFromFiles
         }
       }
 
-      double cpudiff = maximum - minimum;
+      double cpudiff = 0;
+      
+      if( minimum != Double.MAX_VALUE && maximum != Double.MIN_NORMAL)
+      {
+        cpudiff = maximum - minimum;
+      }
 
       String namespace = data.getNamespace();
 
@@ -195,7 +200,12 @@ public class GenerateReportFromFiles
       }
 
       String podName = data.getNamespace() + "/" + data.getPod();
-      double cpudiff = maximum - minimum;
+      double cpudiff = 0;
+
+      if( minimum != Double.MAX_VALUE && maximum != Double.MIN_NORMAL)
+      {
+        cpudiff = maximum - minimum;
+      }
 
       if( !( podCPUCounts.containsKey(podName)))
       {
