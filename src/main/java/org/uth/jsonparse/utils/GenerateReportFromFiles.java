@@ -8,9 +8,10 @@ public class GenerateReportFromFiles
 {
   public static void main(String[] args )  
   {
-    if( args.length != 4 )
+    if( args.length != 4 && args.length != 5 )
     {
       System.out.println( "Usage: java GenerateReportFromFiles sourceDir targetReportFile start(YYYY-MM-DD hh:mm:ss) finish(YYYY-MM-DD hh:mm:ss)");
+      System.out.println( "Usage: java GenerateReportFromFiles sourceDir targetReportFile start(YYYY-MM-DD hh:mm:ss) finish(YYYY-MM-DD hh:mm:ss) targetPOD(optional)");
       System.exit(0);
     }  
 
@@ -28,10 +29,11 @@ public class GenerateReportFromFiles
       System.exit(0);
     }
 
-    new GenerateReportFromFiles( args[0], args[1], start, end );
+    String targetPod = ( args.length == 4 ? null : args[4] );
+    new GenerateReportFromFiles( args[0], args[1], start, end, targetPod );
   }
 
-  public GenerateReportFromFiles( String sourceDir, String targetFile, long start, long end )
+  public GenerateReportFromFiles( String sourceDir, String targetFile, long start, long end, String targetPod )
   {
     List<Metrics> allMetrics = new ArrayList<Metrics>();
 
@@ -126,7 +128,7 @@ public class GenerateReportFromFiles
       {
         // Only process if startPoint is zero *or* the timestamp falls between the targets
         if( start == 0 || 
-            ( datestamp.doubleValue() >= start && datestamp.doubleValue() <= end ))
+            (datestamp.doubleValue() >= start && datestamp.doubleValue() <= end ))
         {
           Double value = values.get(datestamp);
           
@@ -178,49 +180,52 @@ public class GenerateReportFromFiles
 
     for( Metrics data : allMetrics )
     {
-      // Aggregate the CPU counts for this metric
-      double minimum = Double.MAX_VALUE;
-      double maximum = Double.MIN_VALUE;
-
-      Map<Long,Double> values = data.getMetrics();
-
-      System.out.println( "Metric count for pod " + data.getPod() + " = " + values.size());
-
-      for( Long datestamp : values.keySet())
+      if( targetPod == null || data.getPod().equals(targetPod))
       {
-        // Only process if startPoint is zero *or* the timestamp falls between the targets
-        if( start == 0 || 
-            ( datestamp.doubleValue() >= start && datestamp.doubleValue() <= end ))
+        // Aggregate the CPU counts for this metric
+        double minimum = Double.MAX_VALUE;
+        double maximum = Double.MIN_VALUE;
+
+        Map<Long,Double> values = data.getMetrics();
+
+        System.out.println( "Metric count for pod " + data.getPod() + " = " + values.size());
+
+        for( Long datestamp : values.keySet())
         {
-          Double value = values.get(datestamp);
+          // Only process if startPoint is zero *or* the timestamp falls between the targets
+          if( start == 0 || 
+              ( datestamp.doubleValue() >= start && datestamp.doubleValue() <= end ))
+          {
+            Double value = values.get(datestamp);
 
-          if( value.doubleValue() > maximum ) maximum = value.doubleValue();
-          if( value.doubleValue() < minimum ) minimum = value.doubleValue();
+            if( value.doubleValue() > maximum ) maximum = value.doubleValue();
+            if( value.doubleValue() < minimum ) minimum = value.doubleValue();
+          }
         }
-      }
 
-      String podName = data.getNamespace() + "/" + data.getPod();
-      double cpudiff = 0;
+        String podName = data.getNamespace() + "/" + data.getPod();
+        double cpudiff = 0;
 
-      if( minimum != Double.MAX_VALUE && maximum != Double.MIN_NORMAL)
-      {
-        cpudiff = maximum - minimum;
-      }
-
-      if( !( podCPUCounts.containsKey(podName)))
-      {
-        podCPUCounts.put(podName, new Double( cpudiff ));
-      }
-      else
-      {
-        Double current = podCPUCounts.get(podName);
-
-        if( cpudiff > current.doubleValue())
+        if( minimum != Double.MAX_VALUE && maximum != Double.MIN_NORMAL)
         {
-          podCPUCounts.remove(podName);
-          podCPUCounts.put(podName, new Double( cpudiff));
+          cpudiff = maximum - minimum;
         }
-      }
+
+        if( !( podCPUCounts.containsKey(podName)))
+        {
+          podCPUCounts.put(podName, new Double( cpudiff ));
+        }
+        else
+        {
+          Double current = podCPUCounts.get(podName);
+
+          if( cpudiff > current.doubleValue())
+          {
+            podCPUCounts.remove(podName);
+            podCPUCounts.put(podName, new Double( cpudiff));
+          }
+        }
+      }  
     }
 
     // Sort the podNames
@@ -230,7 +235,10 @@ public class GenerateReportFromFiles
     {
       String aggregateName = data.getNamespace() + "/" + data.getPod();
 
-      if( !( podNames.contains(aggregateName))) podNames.add( aggregateName);
+      if( targetPod == null | data.getPod().equals(targetPod))
+      {
+        if( !( podNames.contains(aggregateName))) podNames.add( aggregateName);
+      }
     }
 
     Collections.sort(podNames, String.CASE_INSENSITIVE_ORDER);

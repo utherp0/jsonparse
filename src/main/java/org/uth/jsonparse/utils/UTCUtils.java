@@ -22,4 +22,29 @@ public class UTCUtils
 
     return sdf.format(date);
   }
+
+  public static void main( String args[] )
+  {
+    if( args.length != 1 )
+    {
+      System.out.println( "Usage: java UTCUtils input (either yyyy-mm-dd hh:mm:ss or UNIX Epoch Time");
+      System.exit(0);
+    }
+
+    try
+    {
+      if( args[0].indexOf( "-" ) != -1 )
+      {
+        System.out.println( args[0] + " : " + UTCUtils.convertToUTC(args[0]));
+      }
+      else
+      {
+        System.out.println( args[0] + " : " + UTCUtils.generateHumanReadable(Long.parseLong(args[0])));
+      }
+    }
+    catch( Exception exc )
+    {
+      System.out.println( "Exception occurred " + exc.toString());
+    }
+  }
 }
