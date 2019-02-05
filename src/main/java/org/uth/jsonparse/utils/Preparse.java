@@ -52,14 +52,14 @@ public class Preparse
           individualRecord.append( "]}}");
 
           // Get the pod name
-          int podNameStart = working.toString().indexOf("\"pod_name\":\"");
-          int podNameEnd = working.toString().indexOf("\"", podNameStart + "\"pod_name\":\"".length());
-          String podName = working.toString().substring(podNameStart + "\"pod_name\":\"".length(),podNameEnd);
+          //int podNameStart = working.toString().indexOf("\"pod_name\":\"");
+          //int podNameEnd = working.toString().indexOf("\"", podNameStart + "\"pod_name\":\"".length());
+          //String podName = working.toString().substring(podNameStart + "\"pod_name\":\"".length(),podNameEnd);
 
-          System.out.println( podName );
+          //System.out.println( podName );
 
           // Write a file
-          PrintWriter writer = new PrintWriter( targetDirectory + File.separator + podName + ".json");
+          PrintWriter writer = new PrintWriter( targetDirectory + File.separator + "data" + fileCount + ".json");
           writer.println( individualRecord.toString());
           writer.close();
 
